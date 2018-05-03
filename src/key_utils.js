@@ -1,5 +1,5 @@
 const assert = require('assert')
-const randomBytes = require('randombytes');
+const randomBytes = require('crypto').randomBytes;
 
 const hash = require('./hash');
 
