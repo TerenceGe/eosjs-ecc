@@ -10,7 +10,8 @@ const Long = ByteBuffer.Long;
 
 module.exports = {
   encrypt,
-  decrypt
+  decrypt,
+  uniqueNonce
 }
 
 /**
@@ -27,7 +28,7 @@ module.exports = {
     @property {Buffer} message - Plain text message
     @property {number} checksum - shared secret checksum
 */
-function encrypt(private_key, public_key, message, nonce = uniqueNonce()) {
+function encrypt(private_key, public_key, message, nonce) {
     return crypt(private_key, public_key, nonce, message)
 }
 
@@ -147,17 +148,25 @@ function cryptoJsEncrypt(message, key, iv) {
 /** @return {string} unique 64 bit unsigned number string.  Being time based, this is careful to never choose the same nonce twice.  This value could be recorded in the blockchain for a long time.
 */
 function uniqueNonce() {
-    if(unique_nonce_entropy === null) {
-        const b = new Uint8Array(randomBytes(2))
-        unique_nonce_entropy = parseInt(b[0] << 8 | b[1], 10)
-    }
-    let long = Long.fromNumber(Date.now())
-    const entropy = ++unique_nonce_entropy % 0xFFFF
-    // console.log('uniqueNonce date\t', ByteBuffer.allocate(8).writeUint64(long).toHex(0))
-    // console.log('uniqueNonce entropy\t', ByteBuffer.allocate(8).writeUint64(Long.fromNumber(entropy)).toHex(0))
-    long = long.shiftLeft(16).or(Long.fromNumber(entropy));
-    // console.log('uniqueNonce final\t', ByteBuffer.allocate(8).writeUint64(long).toHex(0))
-    return long.toString()
+  return new Promise((resolve, reject) => {
+    randomBytes(2, (error, bytes) => {
+      if (error) {
+        reject(error)
+      } else {
+        if(unique_nonce_entropy === null) {
+          const b = new Uint8Array(bytes.toString('hex'))
+          unique_nonce_entropy = parseInt(b[0] << 8 | b[1], 10)
+        }
+        let long = Long.fromNumber(Date.now())
+        const entropy = ++unique_nonce_entropy % 0xFFFF
+        // console.log('uniqueNonce date\t', ByteBuffer.allocate(8).writeUint64(long).toHex(0))
+        // console.log('uniqueNonce entropy\t', ByteBuffer.allocate(8).writeUint64(Long.fromNumber(entropy)).toHex(0))
+        long = long.shiftLeft(16).or(Long.fromNumber(entropy));
+        // console.log('uniqueNonce final\t', ByteBuffer.allocate(8).writeUint64(long).toHex(0))
+        resolve(long.toString())
+      }
+    })
+  })
 }
 let unique_nonce_entropy = null
 // for(let i=1; i < 10; i++) key.uniqueNonce()
