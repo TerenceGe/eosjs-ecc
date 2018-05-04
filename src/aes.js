@@ -154,7 +154,7 @@ function uniqueNonce() {
         reject(error)
       } else {
         if(unique_nonce_entropy === null) {
-          const b = new Uint8Array(bytes.toString('hex'))
+          const b = new Uint8Array(bytes)
           unique_nonce_entropy = parseInt(b[0] << 8 | b[1], 10)
         }
         let long = Long.fromNumber(Date.now())

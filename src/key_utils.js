@@ -32,7 +32,7 @@ function random32ByteBuffer({cpuEntropyBits = 0, safe = true} = {}) {
       if (error) {
         reject(error)
       } else {
-        resolve(bytes.toString('hex'))
+        resolve(bytes)
       }
     })
   })
@@ -163,7 +163,7 @@ function browserEntropy() {
       if (error) {
         reject(error)
       } else {
-        let entropyStr = Array(byte.toString('hex')).join()
+        let entropyStr = Array(byte).join()
         try {
           entropyStr += (new Date()).toString() + " " + window.screen.height + " " + window.screen.width + " " +
             window.screen.colorDepth + " " + " " + window.screen.availHeight + " " + window.screen.availWidth + " " +
