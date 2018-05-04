@@ -1,5 +1,5 @@
 const assert = require('assert')
-const randomBytes = require('crypto').randomBytes;
+const randomBytes = require('react-native-randombytes').randomBytes;
 
 const hash = require('./hash');
 

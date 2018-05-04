@@ -1,4 +1,4 @@
-const randomBytes = require('crypto').randomBytes
+const randomBytes = require('react-native-randombytes').randomBytes
 const ByteBuffer = require('bytebuffer')
 const crypto = require('browserify-aes')
 const assert = require('assert')
