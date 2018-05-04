@@ -219,18 +219,18 @@ PrivateKey.fromWif = function(_private_wif) {
   @return {Promise<PrivateKey>} - random private key
 */
 PrivateKey.randomKey = function(cpuEntropyBits = 0) {
-  return PrivateKey.initialize().then(() => (
-    PrivateKey.fromBuffer(keyUtils.random32ByteBuffer({cpuEntropyBits}))
-  ))
+  const init = PrivateKey.initialize()
+  const getRandom32ByteBuffer = keyUtils.random32ByteBuffer({cpuEntropyBits})
+  return Promise.all([getRandom32ByteBuffer, init]).then(function(values) {
+    PrivateKey.fromBuffer(values[0])
+  })
 }
 
 /**
   @return {Promise<PrivateKey>} for testing, does not require initialize().
 */
 PrivateKey.unsafeRandomKey = function() {
-  return Promise.resolve(
-    PrivateKey.fromBuffer(keyUtils.random32ByteBuffer({safe: false}))
-  )
+  return keyUtils.random32ByteBuffer({safe: false}).then(value => PrivateKey.fromBuffer(value))
 }
 
 
@@ -288,4 +288,3 @@ const doesNotThrow = (cb, msg) => {
     throw error
   }
 }
-

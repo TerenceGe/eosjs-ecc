@@ -27,6 +27,19 @@ const externalEntropyArray = randomBytes(101)
     @return a random buffer obtained from the secure random number generator.  Additional entropy is used.
 */
 function random32ByteBuffer({cpuEntropyBits = 0, safe = true} = {}) {
+  const getRandomBytes = new Promise((resolve, reject) => {
+    randomBytes(32, (error, bytes) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(bytes.toString('hex'))
+      }
+    })
+  })
+
+  const getBrowserEntropy = browserEntropy()
+
+  Promise.all([getRandomBytes, getBrowserEntropy]).then(function(values) {
     assert(typeof cpuEntropyBits, 'number', 'cpuEntropyBits')
     assert(typeof safe, 'boolean', 'boolean')
 
@@ -39,11 +52,12 @@ function random32ByteBuffer({cpuEntropyBits = 0, safe = true} = {}) {
     // }
 
     const hash_array = []
-    hash_array.push(randomBytes(32))
+    hash_array.push(values[0])
     hash_array.push(Buffer.from(cpuEntropy(cpuEntropyBits)))
     hash_array.push(externalEntropyArray)
-    hash_array.push(browserEntropy())
+    hash_array.push(values[1])
     return hash.sha256(Buffer.concat(hash_array))
+  })
 }
 
 /**
@@ -144,28 +158,36 @@ const log2 = x => Math.log(x) / Math.LN2
     @return {Buffer} 32 bytes
 */
 function browserEntropy() {
-    let entropyStr = Array(randomBytes(101)).join()
-    try {
-        entropyStr += (new Date()).toString() + " " + window.screen.height + " " + window.screen.width + " " +
+  return new Promise((resolve, reject) => {
+    randomBytes(101, (error, byte) => {
+      if (error) {
+        reject(error)
+      } else {
+        let entropyStr = Array(byte.toString('hex')).join()
+        try {
+          entropyStr += (new Date()).toString() + " " + window.screen.height + " " + window.screen.width + " " +
             window.screen.colorDepth + " " + " " + window.screen.availHeight + " " + window.screen.availWidth + " " +
             window.screen.pixelDepth + navigator.language + " " + window.location + " " + window.history.length;
 
-        for (let i = 0, mimeType; i < navigator.mimeTypes.length; i++) {
+          for (let i = 0, mimeType; i < navigator.mimeTypes.length; i++) {
             mimeType = navigator.mimeTypes[i];
             entropyStr += mimeType.description + " " + mimeType.type + " " + mimeType.suffixes + " ";
+          }
+        } catch(error) {
+          //nodejs:ReferenceError: window is not defined
+          entropyStr += hash.sha256((new Date()).toString())
         }
-    } catch(error) {
-        //nodejs:ReferenceError: window is not defined
-        entropyStr += hash.sha256((new Date()).toString())
-    }
 
-    const b = new Buffer(entropyStr);
-    entropyStr += b.toString('binary') + " " + (new Date()).toString();
+        const b = new Buffer(entropyStr);
+        entropyStr += b.toString('binary') + " " + (new Date()).toString();
 
-    let entropy = entropyStr;
-    const start_t = Date.now();
-    while (Date.now() - start_t < 25)
-        entropy = hash.sha256(entropy);
+        let entropy = entropyStr;
+        const start_t = Date.now();
+        while (Date.now() - start_t < 25)
+          entropy = hash.sha256(entropy);
 
-    return entropy;
+        resolve(entropy)
+      }
+    })
+  })
 }
