@@ -222,7 +222,7 @@ PrivateKey.randomKey = function(cpuEntropyBits = 0) {
   const init = PrivateKey.initialize()
   const getRandom32ByteBuffer = keyUtils.random32ByteBuffer({cpuEntropyBits})
   return Promise.all([getRandom32ByteBuffer, init]).then(function(values) {
-    PrivateKey.fromBuffer(values[0])
+    return PrivateKey.fromBuffer(values[0])
   })
 }
 

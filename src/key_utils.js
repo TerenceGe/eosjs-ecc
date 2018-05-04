@@ -39,7 +39,7 @@ function random32ByteBuffer({cpuEntropyBits = 0, safe = true} = {}) {
 
   const getBrowserEntropy = browserEntropy()
 
-  Promise.all([getRandomBytes, getBrowserEntropy]).then(function(values) {
+  return Promise.all([getRandomBytes, getBrowserEntropy]).then(function(values) {
     assert(typeof cpuEntropyBits, 'number', 'cpuEntropyBits')
     assert(typeof safe, 'boolean', 'boolean')
 
