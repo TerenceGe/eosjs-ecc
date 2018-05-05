@@ -1,6 +1,6 @@
 {
   "name": "react-native-eosjs-ecc",
-  "version": "3.1.4",
+  "version": "4.0.0",
   "description": "Elliptic curve cryptography functions",
   "keywords": "ECC, Private Key, Public Key, Signature, AES, Encryption, Decryption",
   "main": "lib/index.js",
@@ -39,7 +39,8 @@
     "coveralls": "^3.0.0",
     "documentation": "^5.3.2",
     "istanbul": "^0.4.5",
-    "mocha": "^3.5.3"
+    "mocha": "^3.5.3",
+    "nyc": "^11.7.1"
   },
   "babel": {
     "presets": [
